@@ -34,13 +34,13 @@ impl Default for Square {
     }
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum HitResult {
+    Hit,
+    Miss,
+}
+
 impl Square {
-    fn is_ship(&self) -> bool {
-        self == &Square::Ship || self == &Square::ShipHit
-    }
-    fn is_sea(&self) -> bool {
-        self == &Square::Sea || self == &Square::SeaMiss
-    }
     fn to_public(&self) -> Square {
         if self == &Square::Ship {
             Square::Sea
@@ -49,15 +49,18 @@ impl Square {
         }
     }
 
-    pub fn hit(&mut self) -> bool {
-        // True if a new hit or a redundant hit
-        if self.is_ship() {
-            *self = Square::ShipHit;
-            true
-        } else {
-            debug_assert!(self.is_sea());
-            *self = Square::SeaMiss;
-            false
+    pub fn shoot(&mut self) -> HitResult {
+        // Returns true if a **new** hit
+        match *self {
+            Square::Ship => {
+                *self = Square::ShipHit;
+                HitResult::Hit
+            }
+            Square::Sea => {
+                *self = Square::SeaMiss;
+                HitResult::Miss
+            }
+            Square::ShipHit | Square::SeaMiss => HitResult::Miss,
         }
     }
 }
@@ -91,13 +94,20 @@ impl View for Square {
 #[derive(Debug, Default)]
 pub struct Board {
     grid: [[Square; BOARD_COLS]; BOARD_ROWS],
+    ship_remaining: usize,
 }
 
 impl Board {
-    pub fn hit(&mut self, row: usize, col: usize) -> bool {
+    /// Fire a shot at a square on the board
+    pub fn shoot(&mut self, row: usize, col: usize) -> HitResult {
         debug_assert!(row < BOARD_ROWS);
         debug_assert!(col < BOARD_COLS);
-        self.grid[row][col].hit()
+        let result = self.grid[row][col].shoot();
+        if result == HitResult::Hit {
+            debug_assert!(self.ship_remaining > 0);
+            self.ship_remaining -= 1;
+        }
+        result
     }
 }
 
