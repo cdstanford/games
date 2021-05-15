@@ -4,12 +4,12 @@
 */
 
 pub trait View {
-    // Whether two items are equal in ground truth
+    /// Whether two items are equal in ground truth
     fn eq_priv(&self, other: &Self) -> bool;
-    // Whether two items have the same public view
+    /// Whether two items have the same public view
     fn eq_pub(&self, other: &Self) -> bool;
-    // Display ground truth
+    /// Display ground truth
     fn disp_priv(&self) -> String;
-    // Display public view
+    /// Display public view
     fn disp_pub(&self) -> String;
 }

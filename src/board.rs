@@ -41,7 +41,8 @@ pub enum HitResult {
 }
 
 impl Square {
-    fn to_public(&self) -> Square {
+    /// Hide information about the square that isn't publically visible
+    fn hide(&self) -> Square {
         if self == &Square::Ship {
             Square::Sea
         } else {
@@ -49,6 +50,7 @@ impl Square {
         }
     }
 
+    /// Fire a shot at the square
     pub fn shoot(&mut self) -> HitResult {
         // Returns true if a **new** hit
         match *self {
@@ -70,9 +72,8 @@ impl View for Square {
         self == other
     }
     fn eq_pub(&self, other: &Self) -> bool {
-        self.to_public() == other.to_public()
+        self.hide() == other.hide()
     }
-    // Display ground truth
     fn disp_priv(&self) -> String {
         match *self {
             Square::Ship => "s".to_string(),
@@ -81,9 +82,8 @@ impl View for Square {
             Square::SeaMiss => "o".to_string(),
         }
     }
-    // Display public view
     fn disp_pub(&self) -> String {
-        self.to_public().disp_priv()
+        self.hide().disp_priv()
     }
 }
 
@@ -108,6 +108,37 @@ impl Board {
             self.ship_remaining -= 1;
         }
         result
+    }
+
+    /// Get ground truth about a square
+    pub fn get_priv(&self, row: usize, col: usize) -> Square {
+        debug_assert!(row < BOARD_ROWS);
+        debug_assert!(col < BOARD_COLS);
+        self.grid[row][col]
+    }
+
+    /// Get publicly visible info about a square
+    pub fn get_pub(&self, row: usize, col: usize) -> Square {
+        debug_assert!(row < BOARD_ROWS);
+        debug_assert!(col < BOARD_COLS);
+        self.grid[row][col].hide()
+    }
+
+    /// Place a ship on the board
+    /// Returns true if successful
+    pub fn place_ship_square(&mut self, row: usize, col: usize) -> bool {
+        debug_assert!(row < BOARD_ROWS);
+        debug_assert!(col < BOARD_COLS);
+        let square = self.get_priv(row, col);
+        if self.get_priv(row, col) == Square::Ship {
+            false
+        } else {
+            // No hits/misses should have occured yet
+            debug_assert!(square == Square::Sea);
+            self.grid[row][col] = Square::Ship;
+            self.ship_remaining += 1;
+            true
+        }
     }
 }
 
