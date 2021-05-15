@@ -16,8 +16,8 @@ const BOARD_COLS: usize = 10;
 
 /*
     Enums for squares in the grid:
-    - Loc is the ground truth about the cell (on either player's board)
-    - LocInfo is the info another player might have about a cell
+    - Square is the ground truth about the cell (on either player's board)
+    - HitResult is the result of shooting a square
 */
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
