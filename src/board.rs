@@ -11,8 +11,38 @@ use itertools::Itertools;
 
 use crate::traits::View;
 
+/*
+    Coordinates and directions
+*/
+
 const BOARD_ROWS: usize = 10;
 const BOARD_COLS: usize = 10;
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Coord {
+    row: usize,
+    col: usize,
+}
+impl Coord {
+    pub fn is_valid(&self) -> bool {
+        self.row < BOARD_ROWS && self.col < BOARD_COLS
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct Dir {
+    drow: isize,
+    dcol: isize,
+}
+impl Dir {
+    pub fn is_valid(&self) -> bool {
+        (self.drow != 0 || self.dcol != 0)
+            && self.drow >= -1
+            && self.drow <= 1
+            && self.dcol >= -1
+            && self.dcol <= 1
+    }
+}
 
 /*
     Enums for squares in the grid:
@@ -98,11 +128,24 @@ pub struct Board {
 }
 
 impl Board {
+    fn get_square(&self, coord: Coord) -> &Square {
+        debug_assert!(coord.is_valid());
+        &self.grid[coord.row][coord.col]
+    }
+    fn get_square_mut(&mut self, coord: Coord) -> &mut Square {
+        debug_assert!(coord.is_valid());
+        &mut self.grid[coord.row][coord.col]
+    }
+
+    /// Get remaining ship squares
+    pub fn ship_squares_left(&self) -> usize {
+        self.ship_remaining
+    }
+
     /// Fire a shot at a square on the board
-    pub fn shoot(&mut self, row: usize, col: usize) -> HitResult {
-        debug_assert!(row < BOARD_ROWS);
-        debug_assert!(col < BOARD_COLS);
-        let result = self.grid[row][col].shoot();
+    pub fn shoot(&mut self, coord: Coord) -> HitResult {
+        debug_assert!(coord.is_valid());
+        let result = self.get_square_mut(coord).shoot();
         if result == HitResult::Hit {
             debug_assert!(self.ship_remaining > 0);
             self.ship_remaining -= 1;
@@ -111,31 +154,28 @@ impl Board {
     }
 
     /// Get ground truth about a square
-    pub fn get_priv(&self, row: usize, col: usize) -> Square {
-        debug_assert!(row < BOARD_ROWS);
-        debug_assert!(col < BOARD_COLS);
-        self.grid[row][col]
+    pub fn get_priv(&self, coord: Coord) -> Square {
+        debug_assert!(coord.is_valid());
+        *self.get_square(coord)
     }
 
     /// Get publicly visible info about a square
-    pub fn get_pub(&self, row: usize, col: usize) -> Square {
-        debug_assert!(row < BOARD_ROWS);
-        debug_assert!(col < BOARD_COLS);
-        self.grid[row][col].hide()
+    pub fn get_pub(&self, coord: Coord) -> Square {
+        debug_assert!(coord.is_valid());
+        self.get_square(coord).hide()
     }
 
     /// Place a ship on the board
     /// Returns true if successful
-    pub fn place_ship_square(&mut self, row: usize, col: usize) -> bool {
-        debug_assert!(row < BOARD_ROWS);
-        debug_assert!(col < BOARD_COLS);
-        let square = self.get_priv(row, col);
-        if self.get_priv(row, col) == Square::Ship {
+    pub fn place_ship_square(&mut self, coord: Coord) -> bool {
+        debug_assert!(coord.is_valid());
+        let square = self.get_square(coord);
+        if square == &Square::Ship {
             false
         } else {
             // No hits/misses should have occured yet
-            debug_assert!(square == Square::Sea);
-            self.grid[row][col] = Square::Ship;
+            debug_assert!(square == &Square::Sea);
+            *self.get_square_mut(coord) = Square::Ship;
             self.ship_remaining += 1;
             true
         }

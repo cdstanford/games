@@ -20,6 +20,7 @@ pub trait View {
     fn disp_pub(&self) -> String;
 }
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum GameStatus<Player> {
     ToMove(Player),
     Won(Player),
@@ -31,6 +32,8 @@ pub trait Game {
 
     /// Who is to move, or (if the game is ended) who has won
     fn status(&self) -> GameStatus<Self::Player>;
+
+    /// Derived function: whether the game has ended
     fn is_ended(&self) -> bool {
         match self.status() {
             GameStatus::ToMove(_) => false,
@@ -39,8 +42,8 @@ pub trait Game {
     }
 
     /// Whether a move is valid
-    fn valid_move(&self, mv: Self::Move) -> bool;
+    fn valid_move(&self, plyr: Self::Player, mv: Self::Move) -> bool;
 
     /// Making the move
-    fn make_move(&mut self, mv: Self::Move);
+    fn make_move(&mut self, plyr: Self::Player, mv: Self::Move);
 }
