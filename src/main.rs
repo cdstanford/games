@@ -1,6 +1,6 @@
 pub mod board;
-mod game;
-mod view;
+pub mod game;
+mod traits;
 
 fn main() {
     println!("BATTLESHIP");

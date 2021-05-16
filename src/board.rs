@@ -9,7 +9,7 @@
 // Itertools for .join() over Iter<Item = String>
 use itertools::Itertools;
 
-use crate::view::View;
+use crate::traits::View;
 
 const BOARD_ROWS: usize = 10;
 const BOARD_COLS: usize = 10;
