@@ -29,12 +29,9 @@ impl Player {
             Player::Two => 1,
         }
     }
-    // fn num_players() -> usize {
-    //     NUM_PLAYERS
-    // }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct ShipType {
     length: usize,
 }
@@ -53,18 +50,21 @@ pub struct GameState {
 }
 
 impl GameState {
-    // fn get_board(&self, plyr: Player) -> &Board {
-    //     &self.boards[plyr.as_index()]
-    // }
+    fn get_board(&self, plyr: Player) -> &Board {
+        &self.boards[plyr.as_index()]
+    }
     fn get_board_mut(&mut self, plyr: Player) -> &mut Board {
         &mut self.boards[plyr.as_index()]
     }
-    // fn get_pending(&self, plyr: Player) -> &HashSet<ShipType> {
-    //     &self.pending_placement[plyr.as_index()]
-    // }
-    // fn get_pending_mut(&mut self, plyr: Player) -> &mut HashSet<ShipType> {
-    //     &mut self.pending_placement[plyr.as_index()]
-    // }
+    fn get_pending(&self, plyr: Player) -> &HashSet<ShipType> {
+        &self.pending_placement[plyr.as_index()]
+    }
+    fn get_pending_mut(&mut self, plyr: Player) -> &mut HashSet<ShipType> {
+        &mut self.pending_placement[plyr.as_index()]
+    }
+    fn no_pending_placements(&self) -> bool {
+        self.pending_placement.iter().all(|set| set.is_empty())
+    }
 }
 
 impl Game for GameState {
@@ -86,23 +86,27 @@ impl Game for GameState {
     fn valid_move(&self, plyr: Player, mv: Move) -> bool {
         debug_assert_eq!(self.status(), GameStatus::ToMove(plyr));
         match mv {
-            Move::PlaceShip(_ship, _coord, _dir) => {
-                // self.get_board(plyr)
-                // self.boards[plyr.as_index()]
-                // let pending = self.pending[]
-                // let board = self.boards[]
-                unimplemented!()
-                // coord.is_valid() && dir.is_valid() &&
+            Move::PlaceShip(ship, coord, dir) => {
+                let len = ship.length;
+                self.get_pending(plyr).contains(&ship)
+                    && coord.is_valid()
+                    && dir.is_valid()
+                    && self.get_board(plyr).valid_ship_line(coord, dir, len)
             }
-            Move::Shoot(coord) => coord.is_valid(),
+            Move::Shoot(coord) => {
+                self.no_pending_placements() && coord.is_valid()
+            }
         }
     }
     fn make_move(&mut self, plyr: Player, mv: Move) {
         debug_assert_eq!(self.status(), GameStatus::ToMove(plyr));
         debug_assert!(self.valid_move(plyr, mv));
         match mv {
-            Move::PlaceShip(_ship, _coord, _dir) => {
-                unimplemented!()
+            Move::PlaceShip(ship, coord, dir) => {
+                let len = ship.length;
+                let board = self.get_board_mut(plyr);
+                assert!(board.place_ship_line(coord, dir, len));
+                self.get_pending_mut(plyr).remove(&ship);
             }
             Move::Shoot(coord) => {
                 self.get_board_mut(plyr).shoot(coord);

@@ -44,6 +44,20 @@ impl Dir {
     }
 }
 
+impl Coord {
+    fn add(self, dir: Dir) -> Option<Self> {
+        let row = (self.row as isize) + dir.drow;
+        let col = (self.col as isize) + dir.dcol;
+        if row < 0 || col < 0 {
+            None
+        } else {
+            let row = row as usize;
+            let col = col as usize;
+            Some(Self { row, col })
+        }
+    }
+}
+
 /*
     Enums for squares in the grid:
     - Square is the ground truth about the cell (on either player's board)
@@ -178,6 +192,51 @@ impl Board {
             *self.get_square_mut(coord) = Square::Ship;
             self.ship_remaining += 1;
             true
+        }
+    }
+
+    /// Check if a line of squares is open (sea)
+    pub fn valid_ship_line(
+        &self,
+        coord: Coord,
+        dir: Dir,
+        length: usize,
+    ) -> bool {
+        if !coord.is_valid() || !dir.is_valid() {
+            false
+        } else if length == 0 {
+            true
+        } else {
+            let square = self.get_square(coord);
+            if square == &Square::Ship {
+                false
+            } else {
+                debug_assert!(square == &Square::Sea);
+                let new_len = length - 1;
+                match coord.add(dir) {
+                    Some(new) => self.valid_ship_line(new, dir, new_len),
+                    None => false,
+                }
+            }
+        }
+    }
+
+    /// Place a line of ships on the board
+    /// Returns true if successful
+    pub fn place_ship_line(
+        &mut self,
+        mut coord: Coord,
+        dir: Dir,
+        length: usize,
+    ) -> bool {
+        if self.valid_ship_line(coord, dir, length) {
+            for _ in 0..length {
+                assert!(self.place_ship_square(coord));
+                coord = coord.add(dir).unwrap();
+            }
+            true
+        } else {
+            false
         }
     }
 }
