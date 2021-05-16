@@ -3,8 +3,10 @@
 */
 
 use std::collections::HashSet;
+use std::fmt::{self, Display};
+use std::str::FromStr;
 
-use crate::board::{Board, Coord, Dir};
+use crate::board::{Board, Coord, Dir, ParseCoordError};
 use crate::traits::{Game, GameStatus};
 
 /// Would be cool to do this with const generics
@@ -36,10 +38,29 @@ pub struct ShipType {
     length: usize,
 }
 
+#[derive(Debug)]
+pub enum ParseMoveError {
+    ParseCoordError(ParseCoordError),
+    // TODO
+}
+
+impl Display for ParseMoveError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Move {
     PlaceShip(ShipType, Coord, Dir),
     Shoot(Coord),
+}
+impl FromStr for Move {
+    type Err = ParseMoveError;
+
+    fn from_str(_s: &str) -> Result<Self, Self::Err> {
+        unimplemented!()
+    }
 }
 
 #[derive(Debug)]

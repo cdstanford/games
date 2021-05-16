@@ -9,6 +9,10 @@
       (like Stratego or Battleship)
 */
 
+use std::str::FromStr;
+
+use crate::util;
+
 pub trait View {
     /// Whether two items are equal in ground truth
     fn eq_priv(&self, other: &Self) -> bool;
@@ -28,7 +32,7 @@ pub enum GameStatus<Player> {
 
 pub trait Game {
     type Player;
-    type Move;
+    type Move: FromStr;
 
     /// Who is to move, or (if the game is ended) who has won
     fn status(&self) -> GameStatus<Self::Player>;
@@ -46,4 +50,19 @@ pub trait Game {
 
     /// Making the move
     fn make_move(&mut self, plyr: Self::Player, mv: Self::Move);
+
+    // /// Game state visible to a particular player
+    // fn print_state_visible(&self, plyr: Self::Player) -> String;
+
+    /// Execute a move from user input
+    fn user_input_move(&mut self, plyr: Self::Player) {
+        let mut mv: Option<Self::Move> = None;
+        while mv.is_none() {
+            mv = util::user_input("Move: ").parse().ok();
+        }
+        self.make_move(plyr, mv.unwrap());
+    }
+
+    // /// Execute a move from AI input
+    // TODO
 }

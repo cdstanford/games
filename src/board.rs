@@ -6,6 +6,12 @@
     that square)
 */
 
+use std::cmp::Ordering;
+use std::error::Error;
+use std::fmt::{self, Display};
+use std::num::ParseIntError;
+use std::str::FromStr;
+
 // Itertools for .join() over Iter<Item = String>
 use itertools::Itertools;
 
@@ -26,6 +32,50 @@ pub struct Coord {
 impl Coord {
     pub fn is_valid(&self) -> bool {
         self.row < BOARD_ROWS && self.col < BOARD_COLS
+    }
+}
+
+#[derive(Debug)]
+pub enum ParseCoordError {
+    ParseRowError(ParseIntError),
+    ParseColError(ParseIntError),
+    TooFewCoords,
+    TooManyCoords,
+}
+
+impl Display for ParseCoordError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl Error for ParseCoordError {}
+
+// Partly copied from:
+// https://doc.rust-lang.org/stable/std/str/trait.FromStr.html
+impl FromStr for Coord {
+    type Err = ParseCoordError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let coords: Vec<&str> = s
+            .trim_matches(|p| p == '(' || p == ')' )
+            .split(',')
+            .collect();
+        match coords.len().cmp(&2) {
+            Ordering::Greater => Err(ParseCoordError::TooManyCoords),
+            Ordering::Less => Err(ParseCoordError::TooFewCoords),
+            Ordering::Equal => {
+                let x_fromstr = match coords[0].parse::<usize>() {
+                    Ok(x) => x,
+                    Err(x) => return Err(ParseCoordError::ParseRowError(x)),
+                };
+                let y_fromstr = match coords[1].parse::<usize>() {
+                    Ok(x) => x,
+                    Err(x) => return Err(ParseCoordError::ParseColError(x)),
+                };
+                Ok(Coord { row: x_fromstr, col: y_fromstr })
+            }
+        }
     }
 }
 
