@@ -84,16 +84,18 @@ impl Game for GameState {
     }
 
     fn status(&self) -> GameStatus<TwoPlayers> {
-        // This is written in a way agnostic to the number of players
-        for i in 0..NUM_PLAYERS {
-            if self.boards[i].ship_squares_left() == 0 {
-                for j in (i + 1)..NUM_PLAYERS {
-                    debug_assert!(self.boards[j].ship_squares_left() > 0);
-                }
-                return GameStatus::Won(TwoPlayers::from_index(i));
-            }
+        if !self.pending_placement[0].is_empty() {
+            GameStatus::ToMove(TwoPlayers::One)
+        } else if !self.pending_placement[1].is_empty() {
+            GameStatus::ToMove(TwoPlayers::Two)
+        } else if self.boards[0].ship_squares_left() == 0 {
+            debug_assert!(self.boards[1].ship_squares_left() > 0);
+            GameStatus::Won(TwoPlayers::Two)
+        } else if self.boards[1].ship_squares_left() == 0 {
+            GameStatus::Won(TwoPlayers::One)
+        } else {
+            GameStatus::ToMove(self.to_move)
         }
-        GameStatus::ToMove(self.to_move)
     }
     fn valid_move(&self, plyr: TwoPlayers, mv: &Move) -> bool {
         debug_assert_eq!(self.status(), GameStatus::ToMove(plyr));
