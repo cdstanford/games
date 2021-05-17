@@ -6,16 +6,13 @@
     that square)
 */
 
-use std::cmp::Ordering;
-use std::error::Error;
-use std::fmt::{self, Display};
-use std::num::ParseIntError;
 use std::str::FromStr;
 
 // Itertools for .join() over Iter<Item = String>
 use itertools::Itertools;
 
 use crate::traits::View;
+use crate::util;
 
 /*
     Coordinates and directions
@@ -33,47 +30,39 @@ impl Coord {
     pub fn is_valid(&self) -> bool {
         self.row < BOARD_ROWS && self.col < BOARD_COLS
     }
-}
-
-#[derive(Debug)]
-pub enum ParseCoordError {
-    ParseRowError(ParseIntError),
-    ParseColError(ParseIntError),
-    TooFewCoords,
-    TooManyCoords,
-}
-
-impl Display for ParseCoordError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+    pub fn from_usize(row: usize, col: usize) -> Option<Self> {
+        let result = Self { row, col };
+        if result.is_valid() {
+            Some(result)
+        } else {
+            None
+        }
+    }
+    pub fn from_isize(row: isize, col: isize) -> Option<Self> {
+        if row >= 0 && col >= 0 {
+            Self::from_usize(row as usize, col as usize)
+        } else {
+            None
+        }
+    }
+    fn parse_core(s: &str) -> Option<Self> {
+        if let Some(coords) = util::parse_vec_usize(s) {
+            if coords.len() == 2 {
+                let coord = Self { row: coords[0], col: coords[1] };
+                if coord.is_valid() {
+                    return Some(coord);
+                }
+            }
+        }
+        None
     }
 }
 
-impl Error for ParseCoordError {}
-
-// Partly copied from:
-// https://doc.rust-lang.org/stable/std/str/trait.FromStr.html
 impl FromStr for Coord {
-    type Err = ParseCoordError;
+    type Err = ();
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let coords: Vec<&str> =
-            s.trim_matches(|p| p == '(' || p == ')').split(',').collect();
-        match coords.len().cmp(&2) {
-            Ordering::Greater => Err(ParseCoordError::TooManyCoords),
-            Ordering::Less => Err(ParseCoordError::TooFewCoords),
-            Ordering::Equal => {
-                let x_fromstr = match coords[0].parse::<usize>() {
-                    Ok(x) => x,
-                    Err(x) => return Err(ParseCoordError::ParseRowError(x)),
-                };
-                let y_fromstr = match coords[1].parse::<usize>() {
-                    Ok(x) => x,
-                    Err(x) => return Err(ParseCoordError::ParseColError(x)),
-                };
-                Ok(Coord { row: x_fromstr, col: y_fromstr })
-            }
-        }
+    fn from_str(s: &str) -> Result<Self, ()> {
+        Coord::parse_core(s).ok_or(())
     }
 }
 
@@ -89,6 +78,14 @@ impl Dir {
             && self.drow <= 1
             && self.dcol >= -1
             && self.dcol <= 1
+    }
+    pub fn from_isize(drow: isize, dcol: isize) -> Option<Self> {
+        let result = Self { drow, dcol };
+        if result.is_valid() {
+            Some(result)
+        } else {
+            None
+        }
     }
 }
 

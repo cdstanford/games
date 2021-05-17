@@ -2,11 +2,12 @@
     Utility
 */
 
-use std::io::{self, BufRead};
+use std::io::{self, BufRead, Write};
 use std::str::FromStr;
 
 pub fn user_input(query: &str) -> String {
     print!("{}", query);
+    io::stdout().flush().expect("failed to flush stdout");
     let stdin = io::stdin();
     let mut line_iter = stdin.lock().lines();
     line_iter
@@ -38,4 +39,19 @@ where
         result = from_user_input(query_invalid, query_again);
     }
     result
+}
+
+pub fn parse_vec<T: FromStr>(raw: &str) -> Option<Vec<T>> {
+    raw.trim_matches(|p| p == '(' || p == ')' || p == ',')
+        .split(' ')
+        .map(|s| s.parse::<T>().ok())
+        .collect()
+}
+
+pub fn parse_vec_usize(raw: &str) -> Option<Vec<usize>> {
+    parse_vec(raw)
+}
+
+pub fn parse_vec_isize(raw: &str) -> Option<Vec<isize>> {
+    parse_vec(raw)
 }

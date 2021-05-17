@@ -3,12 +3,12 @@
 */
 
 use std::collections::HashSet;
-use std::fmt::{self, Display};
 use std::str::FromStr;
 
-use super::board::{Board, Coord, Dir, ParseCoordError};
+use super::board::{Board, Coord, Dir};
 use crate::play::TwoPlayers;
 use crate::traits::{Game, GameStatus};
+use crate::util;
 
 const NUM_PLAYERS: usize = 2;
 const STARTING_SHIPS: &[usize] = &[3, 4, 5];
@@ -17,16 +17,17 @@ const STARTING_SHIPS: &[usize] = &[3, 4, 5];
 pub struct ShipType {
     length: usize,
 }
-
-#[derive(Debug)]
-pub enum ParseMoveError {
-    ParseCoordError(ParseCoordError),
-    // TODO
-}
-
-impl Display for ParseMoveError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", self)
+impl ShipType {
+    pub fn from_usize(length: usize) -> Self {
+        Self { length }
+    }
+    pub fn from_isize(length: isize) -> Option<Self> {
+        if length >= 0 {
+            let length = length as usize;
+            Some(Self { length })
+        } else {
+            None
+        }
     }
 }
 
@@ -35,11 +36,39 @@ pub enum Move {
     PlaceShip(ShipType, Coord, Dir),
     Shoot(Coord),
 }
+impl Move {
+    pub fn is_valid(&self) -> bool {
+        match *self {
+            Move::PlaceShip(_ship, coord, dir) => {
+                coord.is_valid() && dir.is_valid()
+            }
+            Move::Shoot(coord) => coord.is_valid(),
+        }
+    }
+    fn parse_core(s: &str) -> Option<Self> {
+        let coords = util::parse_vec_isize(s)?;
+        if coords.len() == 5 {
+            let ship = ShipType::from_isize(coords[0])?;
+            let coord = Coord::from_isize(coords[1], coords[2])?;
+            let dir = Dir::from_isize(coords[3], coords[4])?;
+            let mv = Move::PlaceShip(ship, coord, dir);
+            debug_assert!(mv.is_valid());
+            Some(mv)
+        } else if coords.len() == 2 {
+            let coord = Coord::from_isize(coords[0], coords[1])?;
+            let mv = Move::Shoot(coord);
+            debug_assert!(mv.is_valid());
+            Some(mv)
+        } else {
+            None
+        }
+    }
+}
 impl FromStr for Move {
-    type Err = ParseMoveError;
+    type Err = ();
 
-    fn from_str(_s: &str) -> Result<Self, Self::Err> {
-        unimplemented!()
+    fn from_str(s: &str) -> Result<Self, ()> {
+        Self::parse_core(s).ok_or(())
     }
 }
 
