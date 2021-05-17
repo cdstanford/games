@@ -11,6 +11,7 @@ use crate::play::TwoPlayers;
 use crate::traits::{Game, GameStatus};
 
 const NUM_PLAYERS: usize = 2;
+const STARTING_SHIPS: &[usize] = &[3, 4, 5];
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct ShipType {
@@ -70,6 +71,17 @@ impl GameState {
 impl Game for GameState {
     type Player = TwoPlayers;
     type Move = Move;
+
+    fn new() -> Self {
+        let to_move = TwoPlayers::One;
+        let ships: HashSet<ShipType> = STARTING_SHIPS
+            .iter()
+            .map(|&len| ShipType { length: len })
+            .collect();
+        let pending_placement = [ships.clone(), ships];
+        let boards = [Default::default(), Default::default()];
+        Self { to_move, pending_placement, boards }
+    }
 
     fn status(&self) -> GameStatus<TwoPlayers> {
         // This is written in a way agnostic to the number of players

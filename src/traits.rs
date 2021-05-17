@@ -30,6 +30,9 @@ pub trait Game {
     type Player;
     type Move;
 
+    /// Starting position
+    fn new() -> Self;
+
     /// Who is to move, or (if the game is ended) who has won
     fn status(&self) -> GameStatus<Self::Player>;
 
