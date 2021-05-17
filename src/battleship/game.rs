@@ -7,31 +7,10 @@ use std::fmt::{self, Display};
 use std::str::FromStr;
 
 use super::board::{Board, Coord, Dir, ParseCoordError};
+use crate::play::TwoPlayers;
 use crate::traits::{Game, GameStatus};
 
-/// Would be cool to do this with const generics
-/// Make a type for an integer between 0 and NUM_PLAYERS
 const NUM_PLAYERS: usize = 2;
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum Player {
-    One,
-    Two,
-}
-impl Player {
-    fn from_index(idx: usize) -> Self {
-        match idx {
-            0 => Player::One,
-            1 => Player::Two,
-            _ => panic!("Bad index provided to initialize player"),
-        }
-    }
-    fn as_index(&self) -> usize {
-        match self {
-            Player::One => 0,
-            Player::Two => 1,
-        }
-    }
-}
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct ShipType {
@@ -65,22 +44,22 @@ impl FromStr for Move {
 
 #[derive(Debug)]
 pub struct GameState {
-    to_move: Player,
+    to_move: TwoPlayers,
     pending_placement: [HashSet<ShipType>; NUM_PLAYERS],
     boards: [Board; NUM_PLAYERS],
 }
 
 impl GameState {
-    fn get_board(&self, plyr: Player) -> &Board {
+    fn get_board(&self, plyr: TwoPlayers) -> &Board {
         &self.boards[plyr.as_index()]
     }
-    fn get_board_mut(&mut self, plyr: Player) -> &mut Board {
+    fn get_board_mut(&mut self, plyr: TwoPlayers) -> &mut Board {
         &mut self.boards[plyr.as_index()]
     }
-    fn get_pending(&self, plyr: Player) -> &HashSet<ShipType> {
+    fn get_pending(&self, plyr: TwoPlayers) -> &HashSet<ShipType> {
         &self.pending_placement[plyr.as_index()]
     }
-    fn get_pending_mut(&mut self, plyr: Player) -> &mut HashSet<ShipType> {
+    fn get_pending_mut(&mut self, plyr: TwoPlayers) -> &mut HashSet<ShipType> {
         &mut self.pending_placement[plyr.as_index()]
     }
     fn no_pending_placements(&self) -> bool {
@@ -89,22 +68,22 @@ impl GameState {
 }
 
 impl Game for GameState {
-    type Player = Player;
+    type Player = TwoPlayers;
     type Move = Move;
 
-    fn status(&self) -> GameStatus<Self::Player> {
+    fn status(&self) -> GameStatus<TwoPlayers> {
         // This is written in a way agnostic to the number of players
         for i in 0..NUM_PLAYERS {
             if self.boards[i].ship_squares_left() == 0 {
                 for j in (i + 1)..NUM_PLAYERS {
                     debug_assert!(self.boards[j].ship_squares_left() > 0);
                 }
-                return GameStatus::Won(Player::from_index(i));
+                return GameStatus::Won(TwoPlayers::from_index(i));
             }
         }
         GameStatus::ToMove(self.to_move)
     }
-    fn valid_move(&self, plyr: Player, mv: Move) -> bool {
+    fn valid_move(&self, plyr: TwoPlayers, mv: Move) -> bool {
         debug_assert_eq!(self.status(), GameStatus::ToMove(plyr));
         match mv {
             Move::PlaceShip(ship, coord, dir) => {
@@ -119,7 +98,7 @@ impl Game for GameState {
             }
         }
     }
-    fn make_move(&mut self, plyr: Player, mv: Move) {
+    fn make_move(&mut self, plyr: TwoPlayers, mv: Move) {
         debug_assert_eq!(self.status(), GameStatus::ToMove(plyr));
         debug_assert!(self.valid_move(plyr, mv));
         match mv {
