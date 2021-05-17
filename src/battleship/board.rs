@@ -57,10 +57,8 @@ impl FromStr for Coord {
     type Err = ParseCoordError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let coords: Vec<&str> = s
-            .trim_matches(|p| p == '(' || p == ')' )
-            .split(',')
-            .collect();
+        let coords: Vec<&str> =
+            s.trim_matches(|p| p == '(' || p == ')').split(',').collect();
         match coords.len().cmp(&2) {
             Ordering::Greater => Err(ParseCoordError::TooManyCoords),
             Ordering::Less => Err(ParseCoordError::TooFewCoords),

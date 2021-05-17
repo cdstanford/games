@@ -9,10 +9,6 @@
       (like Stratego or Battleship)
 */
 
-use std::str::FromStr;
-
-use crate::util;
-
 pub trait View {
     /// Whether two items are equal in ground truth
     fn eq_priv(&self, other: &Self) -> bool;
@@ -32,7 +28,7 @@ pub enum GameStatus<Player> {
 
 pub trait Game {
     type Player;
-    type Move: FromStr;
+    type Move;
 
     /// Who is to move, or (if the game is ended) who has won
     fn status(&self) -> GameStatus<Self::Player>;
