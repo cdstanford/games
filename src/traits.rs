@@ -48,21 +48,9 @@ pub trait Game {
     /// Whether a move is valid
     fn valid_move(&self, plyr: Self::Player, mv: Self::Move) -> bool;
 
-    /// Making the move
+    /// Making the move -- ok to assume that it is valid
     fn make_move(&mut self, plyr: Self::Player, mv: Self::Move);
 
     // /// Game state visible to a particular player
     // fn print_state_visible(&self, plyr: Self::Player) -> String;
-
-    /// Execute a move from user input
-    fn user_input_move(&mut self, plyr: Self::Player) {
-        let mut mv: Option<Self::Move> = None;
-        while mv.is_none() {
-            mv = util::user_input("Move: ").parse().ok();
-        }
-        self.make_move(plyr, mv.unwrap());
-    }
-
-    // /// Execute a move from AI input
-    // TODO
 }

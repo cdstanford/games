@@ -6,7 +6,7 @@ use std::collections::HashSet;
 use std::fmt::{self, Display};
 use std::str::FromStr;
 
-use crate::board::{Board, Coord, Dir, ParseCoordError};
+use super::board::{Board, Coord, Dir, ParseCoordError};
 use crate::traits::{Game, GameStatus};
 
 /// Would be cool to do this with const generics
