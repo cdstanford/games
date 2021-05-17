@@ -7,7 +7,7 @@ use std::str::FromStr;
 
 use super::board::{Board, Coord, Dir};
 use crate::play::TwoPlayers;
-use crate::traits::{Game, GameStatus};
+use crate::traits::{Game, GameStatus, View};
 use crate::util;
 
 const NUM_PLAYERS: usize = 2;
@@ -92,6 +92,13 @@ impl GameState {
     fn get_pending_mut(&mut self, plyr: TwoPlayers) -> &mut HashSet<ShipType> {
         &mut self.pending_placement[plyr.as_index()]
     }
+    fn print_pending(&self, plyr: TwoPlayers) -> String {
+        let mut result = String::new();
+        for &ship in self.get_pending(plyr).iter() {
+            result.push_str(&format!("{} ", ship.length));
+        }
+        result
+    }
     fn no_pending_placements(&self) -> bool {
         self.pending_placement.iter().all(|set| set.is_empty())
     }
@@ -154,6 +161,22 @@ impl Game for GameState {
             Move::Shoot(coord) => {
                 self.get_board_mut(plyr).shoot(coord);
             }
+        }
+    }
+    fn print_state_visible(&self, plyr: TwoPlayers) -> String {
+        if self.get_pending(plyr).is_empty() {
+            let other = plyr.opponent();
+            format!(
+                "=== Your Board ===\n{}\n=== Shots ===\n{}\n",
+                self.get_board(plyr).disp_priv(),
+                self.get_board(other).disp_pub(),
+            )
+        } else {
+            format!(
+                "=== Your Board ===\n{}\n=== Ships to Place ===\n{}\n",
+                self.get_board(plyr).disp_priv(),
+                self.print_pending(plyr),
+            )
         }
     }
 }

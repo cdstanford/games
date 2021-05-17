@@ -50,6 +50,6 @@ pub trait Game {
     /// Making the move -- ok to assume that it is valid
     fn make_move(&mut self, plyr: Self::Player, mv: Self::Move);
 
-    // /// Game state visible to a particular player
-    // fn print_state_visible(&self, plyr: Self::Player) -> String;
+    /// Game state visible to a particular player
+    fn print_state_visible(&self, plyr: Self::Player) -> String;
 }

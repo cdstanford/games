@@ -34,6 +34,12 @@ impl TwoPlayers {
             TwoPlayers::Two => 1,
         }
     }
+    pub fn opponent(&self) -> Self {
+        match self {
+            TwoPlayers::One => TwoPlayers::Two,
+            TwoPlayers::Two => TwoPlayers::One,
+        }
+    }
     pub fn name(&self) -> &str {
         match self {
             TwoPlayers::One => "one",
@@ -58,7 +64,7 @@ impl Display for TwoPlayers {
     Play a game
 */
 
-pub fn play_vs_human<G>()
+pub fn play_vs_yourself<G>()
 where
     G: Game<Player = TwoPlayers>,
     G::Move: FromStr,
@@ -67,7 +73,8 @@ where
     loop {
         match game.status() {
             GameStatus::ToMove(plyr) => {
-                println!("Player {}'s turn", plyr);
+                println!("===== Player {}'s turn =====", plyr);
+                println!("{}", game.print_state_visible(plyr));
                 let mv = util::from_user_input_satisfying(
                     "Move: ",
                     "Invalid syntax, try again: ",
