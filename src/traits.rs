@@ -45,7 +45,7 @@ pub trait Game {
     }
 
     /// Whether a move is valid
-    fn valid_move(&self, plyr: Self::Player, mv: Self::Move) -> bool;
+    fn valid_move(&self, plyr: Self::Player, mv: &Self::Move) -> bool;
 
     /// Making the move -- ok to assume that it is valid
     fn make_move(&mut self, plyr: Self::Player, mv: Self::Move);

@@ -95,9 +95,9 @@ impl Game for GameState {
         }
         GameStatus::ToMove(self.to_move)
     }
-    fn valid_move(&self, plyr: TwoPlayers, mv: Move) -> bool {
+    fn valid_move(&self, plyr: TwoPlayers, mv: &Move) -> bool {
         debug_assert_eq!(self.status(), GameStatus::ToMove(plyr));
-        match mv {
+        match *mv {
             Move::PlaceShip(ship, coord, dir) => {
                 let len = ship.length;
                 self.get_pending(plyr).contains(&ship)
@@ -112,7 +112,7 @@ impl Game for GameState {
     }
     fn make_move(&mut self, plyr: TwoPlayers, mv: Move) {
         debug_assert_eq!(self.status(), GameStatus::ToMove(plyr));
-        debug_assert!(self.valid_move(plyr, mv));
+        debug_assert!(self.valid_move(plyr, &mv));
         match mv {
             Move::PlaceShip(ship, coord, dir) => {
                 let len = ship.length;
