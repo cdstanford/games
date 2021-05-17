@@ -2,7 +2,7 @@
     Code to play (execute) a game
 */
 
-use crate::traits::{Game, GameStatus};
+use crate::traits::{Game, GameStatus, GameWithAi};
 use crate::util;
 
 use std::fmt::{self, Display};
@@ -67,7 +67,7 @@ impl Display for TwoPlayers {
 pub fn play_vs_yourself<G>()
 where
     G: Game<Player = TwoPlayers>,
-    G::Move: FromStr,
+    G::Move: FromStr + Display,
 {
     let mut game = G::new();
     loop {
@@ -81,10 +81,52 @@ where
                     "Invalid move, try again: ",
                     |mv| game.valid_move(plyr, mv),
                 );
+                debug_assert!(game.valid_move(plyr, &mv));
+                println!("Move chosen: {}", mv);
                 game.make_move(plyr, mv);
             }
             GameStatus::Won(plyr) => {
                 println!("Player {} wins!", plyr);
+                return;
+            }
+        }
+    }
+}
+
+pub fn play_vs_ai<G>()
+where
+    G: GameWithAi<Player = TwoPlayers>,
+    G::Move: FromStr + Display,
+{
+    let mut game = G::new();
+    loop {
+        match game.status() {
+            GameStatus::ToMove(TwoPlayers::One) => {
+                println!("===== Your turn =====");
+                println!("{}", game.print_state_visible(TwoPlayers::One));
+                let mv = util::from_user_input_satisfying(
+                    "Move: ",
+                    "Invalid syntax, try again: ",
+                    "Invalid move, try again: ",
+                    |mv| game.valid_move(TwoPlayers::One, mv),
+                );
+                debug_assert!(game.valid_move(TwoPlayers::One, &mv));
+                println!("Your move: {}", mv);
+                game.make_move(TwoPlayers::One, mv);
+            }
+            GameStatus::ToMove(TwoPlayers::Two) => {
+                println!("===== Opponent's turn =====");
+                let mv = game.ai_move(TwoPlayers::Two);
+                debug_assert!(game.valid_move(TwoPlayers::Two, &mv));
+                println!("Opponent's move: {}", mv);
+                game.make_move(TwoPlayers::Two, mv);
+            }
+            GameStatus::Won(TwoPlayers::One) => {
+                println!("You win!");
+                return;
+            }
+            GameStatus::Won(TwoPlayers::Two) => {
+                println!("You lose!");
                 return;
             }
         }

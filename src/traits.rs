@@ -53,3 +53,10 @@ pub trait Game {
     /// Game state visible to a particular player
     fn print_state_visible(&self, plyr: Self::Player) -> String;
 }
+
+pub trait GameWithAi: Game {
+    /// Given a state, choose a valid move
+    /// This must satisfy: (1) only uses information that is
+    /// be available to that player; (2) the returned move should be valid
+    fn ai_move(&self, plyr: Self::Player) -> Self::Move;
+}

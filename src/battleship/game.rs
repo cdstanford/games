@@ -3,11 +3,12 @@
 */
 
 use std::collections::HashSet;
+use std::fmt::{self, Display};
 use std::str::FromStr;
 
 use super::board::{Board, Coord, Dir};
 use crate::play::TwoPlayers;
-use crate::traits::{Game, GameStatus, View};
+use crate::traits::{Game, GameStatus, GameWithAi, View};
 use crate::util;
 
 const NUM_PLAYERS: usize = 2;
@@ -69,6 +70,18 @@ impl FromStr for Move {
 
     fn from_str(s: &str) -> Result<Self, ()> {
         Self::parse_core(s).ok_or(())
+    }
+}
+impl Display for Move {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            Move::PlaceShip(ship, coord, dir) => {
+                write!(f, "Place({:?}, {:?}, {:?})", ship, coord, dir)
+            }
+            Move::Shoot(coord) => {
+                write!(f, "Shoot({:?})", coord)
+            }
+        }
     }
 }
 
@@ -178,5 +191,11 @@ impl Game for GameState {
                 self.print_pending(plyr),
             )
         }
+    }
+}
+
+impl GameWithAi for GameState {
+    fn ai_move(&self, _plyr: TwoPlayers) -> Move {
+        unimplemented!()
     }
 }
