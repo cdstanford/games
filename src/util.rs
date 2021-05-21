@@ -1,5 +1,9 @@
 /*
     Utility
+
+    - Getting user input from stdin
+
+    - String parsing functions
 */
 
 use std::io::{self, BufRead, Write};

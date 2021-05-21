@@ -7,9 +7,11 @@ use std::fmt::{self, Display};
 use std::str::FromStr;
 
 use super::board::{Board, Coord, Dir};
+
+use crate::abstract_game::{AbstractGame, Ai, GameStatus};
 use crate::play::TwoPlayers;
-use crate::traits::{Game, GameStatus, GameWithAi, View};
 use crate::util;
+use crate::view::View;
 
 const NUM_PLAYERS: usize = 2;
 const STARTING_SHIPS: &[usize] = &[3, 4, 5];
@@ -117,7 +119,7 @@ impl GameState {
     }
 }
 
-impl Game for GameState {
+impl AbstractGame for GameState {
     type Player = TwoPlayers;
     type Move = Move;
 
@@ -194,8 +196,13 @@ impl Game for GameState {
     }
 }
 
-impl GameWithAi for GameState {
-    fn ai_move(&self, _plyr: TwoPlayers) -> Move {
+pub struct UnimplementedBattleshipAi {}
+
+impl Ai<GameState> for UnimplementedBattleshipAi {
+    fn new() -> Self {
+        Self {}
+    }
+    fn ai_move(&mut self, _game_state: &GameState, _plyr: TwoPlayers) -> Move {
         unimplemented!()
     }
 }

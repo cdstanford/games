@@ -2,8 +2,8 @@
     Code to play (execute) a game
 */
 
-use crate::traits::{Game, GameStatus, GameWithAi};
-use crate::util;
+use super::abstract_game::{AbstractGame, Ai, GameStatus};
+use super::util;
 
 use std::fmt::{self, Display};
 use std::str::FromStr;
@@ -61,12 +61,12 @@ impl Display for TwoPlayers {
 }
 
 /*
-    Play a game
+    Code to play (execute) a game
 */
 
 pub fn play_vs_yourself<G>()
 where
-    G: Game<Player = TwoPlayers>,
+    G: AbstractGame<Player = TwoPlayers>,
     G::Move: FromStr + Display,
 {
     let mut game = G::new();
@@ -93,12 +93,14 @@ where
     }
 }
 
-pub fn play_vs_ai<G>()
+pub fn play_vs_ai<G, A>()
 where
-    G: GameWithAi<Player = TwoPlayers>,
+    G: AbstractGame<Player = TwoPlayers>,
+    A: Ai<G>,
     G::Move: FromStr + Display,
 {
     let mut game = G::new();
+    let mut ai = A::new();
     loop {
         match game.status() {
             GameStatus::ToMove(TwoPlayers::One) => {
@@ -116,7 +118,7 @@ where
             }
             GameStatus::ToMove(TwoPlayers::Two) => {
                 println!("===== Opponent's turn =====");
-                let mv = game.ai_move(TwoPlayers::Two);
+                let mv = ai.ai_move(&game, TwoPlayers::Two);
                 debug_assert!(game.valid_move(TwoPlayers::Two, &mv));
                 println!("Opponent's move: {}", mv);
                 game.make_move(TwoPlayers::Two, mv);

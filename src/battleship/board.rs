@@ -11,8 +11,8 @@ use std::str::FromStr;
 // Itertools for .join() over Iter<Item = String>
 use itertools::Itertools;
 
-use crate::traits::View;
 use crate::util;
+use crate::view::View;
 
 /*
     Coordinates and directions
