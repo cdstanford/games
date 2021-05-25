@@ -147,7 +147,8 @@ impl AbstractGame<NUM_PLAYERS> for GameState {
             GameStatus::ToMove(self.to_move)
         }
     }
-    fn valid_move(&self, plyr: TwoPlayers, mv: &Move) -> bool {
+    fn is_valid_move(&self, mv: &Move) -> bool {
+        let plyr = self.cur_player().unwrap();
         debug_assert_eq!(self.status(), GameStatus::ToMove(plyr));
         match *mv {
             Move::PlaceShip(ship, coord, dir) => {
@@ -162,9 +163,9 @@ impl AbstractGame<NUM_PLAYERS> for GameState {
             }
         }
     }
-    fn make_move(&mut self, plyr: TwoPlayers, mv: Move) {
-        debug_assert_eq!(self.status(), GameStatus::ToMove(plyr));
-        debug_assert!(self.valid_move(plyr, &mv));
+    fn make_move(&mut self, mv: Move) {
+        let plyr = self.cur_player().unwrap();
+        debug_assert!(self.is_valid_move(&mv));
         match mv {
             Move::PlaceShip(ship, coord, dir) => {
                 let len = ship.length;

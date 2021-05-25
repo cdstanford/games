@@ -23,16 +23,11 @@ pub enum GameStatus<const N: usize> {
 /// if N = 0 is that it's impossible to implement `fn status()` since GameStatus
 /// is uninhabited.
 pub trait AbstractGame<const N: usize> {
-    type Move;
+    type Move: Eq;
 
     /*
         Provided methods
     */
-
-    /// Number of players -- should be constant for any instance of the type
-    /// (Generally constant for the type as well, but not necessarily)
-    // fn num_players(&self) -> usize;
-    // TODO
 
     /// Starting position
     fn new() -> Self;
@@ -40,11 +35,16 @@ pub trait AbstractGame<const N: usize> {
     /// Who is to move, or (if the game is ended) who has won
     fn status(&self) -> GameStatus<N>;
 
-    /// Whether a move is valid
-    fn valid_move(&self, plyr: Player<N>, mv: &Self::Move) -> bool;
+    /// Given a move, return whether or not it is valid
+    fn is_valid_move(&self, mv: &Self::Move) -> bool;
+
+    // /// The list of valid moves in this position
+    // /// Ideally should not include duplicate moves
+    // /// TODO
+    // fn valid_moves(&self) -> Vec<Self::Move>;
 
     /// Making the move -- ok to assume that it is valid
-    fn make_move(&mut self, plyr: Player<N>, mv: Self::Move);
+    fn make_move(&mut self, mv: Self::Move);
 
     /// Game state visible to a particular player
     fn print_state_visible(&self, plyr: Player<N>) -> String;
@@ -53,6 +53,11 @@ pub trait AbstractGame<const N: usize> {
         Derived functionality
     */
 
+    /// Number of players in the game
+    fn num_players(&self) -> usize {
+        N
+    }
+
     /// Whether the game has ended
     fn is_ended(&self) -> bool {
         match self.status() {
@@ -60,6 +65,20 @@ pub trait AbstractGame<const N: usize> {
             GameStatus::Won(_) => true,
         }
     }
+
+    /// Current player (if not ended)
+    fn cur_player(&self) -> Option<Player<N>> {
+        match self.status() {
+            GameStatus::ToMove(plyr) => Some(plyr),
+            GameStatus::Won(_) => None,
+        }
+    }
+
+    // /// Number of moves from this position
+    // TODO
+    // fn num_moves(&self) -> usize {
+    //     self.valid_moves().len()
+    // }
 }
 
 pub trait Ai<G, const N: usize>

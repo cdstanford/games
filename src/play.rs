@@ -6,7 +6,7 @@ use super::abstract_game::{AbstractGame, Ai, GameStatus};
 use super::player::Player;
 use super::util;
 
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 use std::str::FromStr;
 
 /*
@@ -18,7 +18,7 @@ use std::str::FromStr;
 pub fn play_vs_yourself<G, const N: usize>()
 where
     G: AbstractGame<N>,
-    G::Move: FromStr + Display,
+    G::Move: FromStr + Debug + Display,
 {
     let mut game = G::new();
     loop {
@@ -26,15 +26,17 @@ where
             GameStatus::ToMove(plyr) => {
                 println!("===== Player {}'s turn =====", plyr);
                 println!("{}", game.print_state_visible(plyr));
+                // TODO
+                // println!("Available moves: {:?}", game.valid_moves());
                 let mv = util::from_user_input_satisfying(
                     "Move: ",
                     "Invalid syntax, try again: ",
                     "Invalid move, try again: ",
-                    |mv| game.valid_move(plyr, mv),
+                    |mv| game.is_valid_move(mv),
                 );
-                debug_assert!(game.valid_move(plyr, &mv));
+                debug_assert!(game.is_valid_move(&mv));
                 println!("Move chosen: {}", mv);
-                game.make_move(plyr, mv);
+                game.make_move(mv);
             }
             GameStatus::Won(plyr) => {
                 println!("Player {} wins!", plyr);
@@ -50,7 +52,7 @@ pub fn play_vs_ai<G, A, const N: usize>(you: Player<N>)
 where
     G: AbstractGame<N>,
     A: Ai<G, N>,
-    G::Move: FromStr + Display,
+    G::Move: FromStr + Debug + Display,
 {
     let mut game = G::new();
     let mut ai = A::new();
@@ -60,21 +62,23 @@ where
                 if plyr == you {
                     println!("===== Your turn =====");
                     println!("{}", game.print_state_visible(you));
+                    // TODO
+                    // println!("Available moves: {:?}", game.valid_moves());
                     let mv = util::from_user_input_satisfying(
                         "Move: ",
                         "Invalid syntax, try again: ",
                         "Invalid move, try again: ",
-                        |mv| game.valid_move(you, mv),
+                        |mv| game.is_valid_move(mv),
                     );
-                    debug_assert!(game.valid_move(you, &mv));
+                    debug_assert!(game.is_valid_move(&mv));
                     println!("Your move: {}", mv);
-                    game.make_move(you, mv);
+                    game.make_move(mv);
                 } else {
                     println!("===== Computer {}'s turn =====", plyr);
                     let mv = ai.ai_move(&game, plyr);
-                    debug_assert!(game.valid_move(plyr, &mv));
+                    debug_assert!(game.is_valid_move(&mv));
                     println!("Computer {}'s move: {}", plyr, mv);
-                    game.make_move(plyr, mv);
+                    game.make_move(mv);
                 }
             }
             GameStatus::Won(plyr) => {
@@ -96,7 +100,7 @@ pub fn play_vs_ai_as_p1<G, A, const N: usize>()
 where
     G: AbstractGame<N>,
     A: Ai<G, N>,
-    G::Move: FromStr + Display,
+    G::Move: FromStr + Debug + Display,
 {
     play_vs_ai::<G, A, N>(
         Player::from_index(0)
@@ -109,7 +113,7 @@ pub fn play_vs_ai_choose_player<G, A, const N: usize>()
 where
     G: AbstractGame<N>,
     A: Ai<G, N>,
-    G::Move: FromStr + Display,
+    G::Move: FromStr + Debug + Display,
 {
     let query = format!("Choose a player between 1 and {}: ", N);
     let requery = format!("Not between 1 and {}. Try again: ", N);
