@@ -103,3 +103,16 @@ where
             .expect("Error: tried to play a game with 0 players"),
     );
 }
+
+// /// Play the game vs AIs, where you choose what player to play
+pub fn play_vs_ai_choose_player<G, A, const N: usize>()
+where
+    G: AbstractGame<N>,
+    A: Ai<G, N>,
+    G::Move: FromStr + Display,
+{
+    let query = format!("Choose a player between 1 and {}: ", N);
+    let requery = format!("Not between 1 and {}. Try again: ", N);
+    let player = util::from_user_input(&query, &requery);
+    play_vs_ai::<G, A, N>(player);
+}

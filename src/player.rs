@@ -3,6 +3,8 @@
 */
 
 use std::fmt::{self, Display};
+use std::num::ParseIntError;
+use std::str::FromStr;
 
 /// Struct representing a player (player 0, player 1, etc.)
 /// (not with respect to any specific game)
@@ -54,6 +56,48 @@ impl<const N: usize> Display for Player<N> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         debug_assert!(self.is_valid());
         write!(f, "{}", self.name_upper())
+    }
+}
+
+/// Custom error struct for parsing player from string
+#[derive(Debug)]
+pub enum ParsePlayerErr {
+    NotUsize(ParseIntError),
+    IndexZero,
+    IndexTooLarge(usize),
+}
+impl From<ParseIntError> for ParsePlayerErr {
+    fn from(err: ParseIntError) -> Self {
+        Self::NotUsize(err)
+    }
+}
+impl Display for ParsePlayerErr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::NotUsize(x) => {
+                write!(f, "invalid integer ({})", x)
+            }
+            Self::IndexZero => {
+                write!(f, "player number must be > 0")
+            }
+            Self::IndexTooLarge(x) => {
+                write!(f, "player number too large: {}", x)
+            }
+        }
+    }
+}
+impl<const N: usize> FromStr for Player<N> {
+    type Err = ParsePlayerErr;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let player_num = s.parse::<usize>()?;
+        if player_num == 0 {
+            Err(ParsePlayerErr::IndexZero)
+        } else if player_num > N {
+            Err(ParsePlayerErr::IndexTooLarge(player_num))
+        } else {
+            Ok(Self::from_index(player_num - 1).unwrap())
+        }
     }
 }
 
