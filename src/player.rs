@@ -2,6 +2,8 @@
     Type for a fixed finite number of players
 */
 
+use super::util::FromStrHelp;
+
 use std::fmt::{self, Display};
 use std::num::ParseIntError;
 use std::str::FromStr;
@@ -98,6 +100,26 @@ impl<const N: usize> FromStr for Player<N> {
         } else {
             Ok(Self::from_index(player_num - 1).unwrap())
         }
+    }
+}
+
+impl<const N: usize> FromStrHelp for Player<N> {
+    fn query() -> String {
+        format!("Choose a player between 1 and {}: ", N)
+    }
+    fn from_str_help(s: &str) -> Result<Self, String> {
+        if let Ok(player_num) = s.parse::<usize>() {
+            if player_num == 0 || player_num > N {
+                Err(format!("Not beteween 1 and {}.", N))
+            } else {
+                Ok(Self::from_index(player_num - 1).unwrap())
+            }
+        } else {
+            Err("Not an integer.".to_string())
+        }
+    }
+    fn help() -> Option<String> {
+        None
     }
 }
 
