@@ -119,8 +119,7 @@ impl GameState {
     }
 }
 
-impl AbstractGame for GameState {
-    type Player = TwoPlayers;
+impl AbstractGame<NUM_PLAYERS> for GameState {
     type Move = Move;
 
     fn new() -> Self {
@@ -134,7 +133,7 @@ impl AbstractGame for GameState {
         Self { to_move, pending_placement, boards }
     }
 
-    fn status(&self) -> GameStatus<TwoPlayers> {
+    fn status(&self) -> GameStatus<NUM_PLAYERS> {
         if !self.pending_placement[0].is_empty() {
             GameStatus::ToMove(TwoPlayers::ONE)
         } else if !self.pending_placement[1].is_empty() {
@@ -198,7 +197,7 @@ impl AbstractGame for GameState {
 
 pub struct UnimplementedBattleshipAi {}
 
-impl Ai<GameState> for UnimplementedBattleshipAi {
+impl Ai<GameState, NUM_PLAYERS> for UnimplementedBattleshipAi {
     fn new() -> Self {
         Self {}
     }

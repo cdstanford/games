@@ -9,7 +9,7 @@
 
 use super::abstract_game::AbstractGame;
 
-pub trait PartialInfoGame: AbstractGame {
+pub trait PartialInfoGame<const N: usize>: AbstractGame<N> {
     /* Additional methods */
     // ???
 }

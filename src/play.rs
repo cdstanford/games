@@ -15,7 +15,7 @@ use std::str::FromStr;
 
 pub fn play_vs_yourself<G>()
 where
-    G: AbstractGame<Player = TwoPlayers>,
+    G: AbstractGame<2>,
     G::Move: FromStr + Display,
 {
     let mut game = G::new();
@@ -44,8 +44,8 @@ where
 
 pub fn play_vs_ai<G, A>()
 where
-    G: AbstractGame<Player = TwoPlayers>,
-    A: Ai<G>,
+    G: AbstractGame<2>,
+    A: Ai<G, 2>,
     G::Move: FromStr + Display,
 {
     let mut game = G::new();
