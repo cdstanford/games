@@ -2,6 +2,7 @@
 pub mod abstract_game;
 pub mod partial_info_game;
 pub mod play;
+pub mod player;
 pub mod util;
 pub mod view;
 

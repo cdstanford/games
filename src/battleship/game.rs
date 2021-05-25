@@ -9,7 +9,7 @@ use std::str::FromStr;
 use super::board::{Board, Coord, Dir};
 
 use crate::abstract_game::{AbstractGame, Ai, GameStatus};
-use crate::play::TwoPlayers;
+use crate::player::TwoPlayers;
 use crate::util;
 use crate::view::View;
 
@@ -124,7 +124,7 @@ impl AbstractGame for GameState {
     type Move = Move;
 
     fn new() -> Self {
-        let to_move = TwoPlayers::One;
+        let to_move = TwoPlayers::ONE;
         let ships: HashSet<ShipType> = STARTING_SHIPS
             .iter()
             .map(|&len| ShipType { length: len })
@@ -136,14 +136,14 @@ impl AbstractGame for GameState {
 
     fn status(&self) -> GameStatus<TwoPlayers> {
         if !self.pending_placement[0].is_empty() {
-            GameStatus::ToMove(TwoPlayers::One)
+            GameStatus::ToMove(TwoPlayers::ONE)
         } else if !self.pending_placement[1].is_empty() {
-            GameStatus::ToMove(TwoPlayers::Two)
+            GameStatus::ToMove(TwoPlayers::TWO)
         } else if self.boards[0].ship_squares_left() == 0 {
             debug_assert!(self.boards[1].ship_squares_left() > 0);
-            GameStatus::Won(TwoPlayers::Two)
+            GameStatus::Won(TwoPlayers::TWO)
         } else if self.boards[1].ship_squares_left() == 0 {
-            GameStatus::Won(TwoPlayers::One)
+            GameStatus::Won(TwoPlayers::ONE)
         } else {
             GameStatus::ToMove(self.to_move)
         }

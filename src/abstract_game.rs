@@ -24,6 +24,11 @@ pub trait AbstractGame {
         Provided methods
     */
 
+    /// Number of players -- should be constant for any instance of the type
+    /// (Generally constant for the type as well, but not necessarily)
+    // fn num_players(&self) -> usize;
+    // TODO
+
     /// Starting position
     fn new() -> Self;
 

@@ -3,62 +3,11 @@
 */
 
 use super::abstract_game::{AbstractGame, Ai, GameStatus};
+use super::player::TwoPlayers;
 use super::util;
 
-use std::fmt::{self, Display};
+use std::fmt::Display;
 use std::str::FromStr;
-
-/*
-    Two-player enum
-    Would be cool to do this with const generics
-    (Make a type for an integer between 0 and NUM_PLAYERS)
-*/
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum TwoPlayers {
-    One,
-    Two,
-}
-
-impl TwoPlayers {
-    pub fn from_index(idx: usize) -> Self {
-        match idx {
-            0 => TwoPlayers::One,
-            1 => TwoPlayers::Two,
-            _ => panic!("Bad index provided to initialize player"),
-        }
-    }
-    pub fn as_index(&self) -> usize {
-        match self {
-            TwoPlayers::One => 0,
-            TwoPlayers::Two => 1,
-        }
-    }
-    pub fn opponent(&self) -> Self {
-        match self {
-            TwoPlayers::One => TwoPlayers::Two,
-            TwoPlayers::Two => TwoPlayers::One,
-        }
-    }
-    pub fn name(&self) -> &str {
-        match self {
-            TwoPlayers::One => "one",
-            TwoPlayers::Two => "two",
-        }
-    }
-    pub fn name_upper(&self) -> &str {
-        match self {
-            TwoPlayers::One => "One",
-            TwoPlayers::Two => "Two",
-        }
-    }
-}
-
-impl Display for TwoPlayers {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.name())
-    }
-}
 
 /*
     Code to play (execute) a game
@@ -103,33 +52,36 @@ where
     let mut ai = A::new();
     loop {
         match game.status() {
-            GameStatus::ToMove(TwoPlayers::One) => {
+            GameStatus::ToMove(TwoPlayers::ONE) => {
                 println!("===== Your turn =====");
-                println!("{}", game.print_state_visible(TwoPlayers::One));
+                println!("{}", game.print_state_visible(TwoPlayers::ONE));
                 let mv = util::from_user_input_satisfying(
                     "Move: ",
                     "Invalid syntax, try again: ",
                     "Invalid move, try again: ",
-                    |mv| game.valid_move(TwoPlayers::One, mv),
+                    |mv| game.valid_move(TwoPlayers::ONE, mv),
                 );
-                debug_assert!(game.valid_move(TwoPlayers::One, &mv));
+                debug_assert!(game.valid_move(TwoPlayers::ONE, &mv));
                 println!("Your move: {}", mv);
-                game.make_move(TwoPlayers::One, mv);
+                game.make_move(TwoPlayers::ONE, mv);
             }
-            GameStatus::ToMove(TwoPlayers::Two) => {
+            GameStatus::ToMove(TwoPlayers::TWO) => {
                 println!("===== Opponent's turn =====");
-                let mv = ai.ai_move(&game, TwoPlayers::Two);
-                debug_assert!(game.valid_move(TwoPlayers::Two, &mv));
+                let mv = ai.ai_move(&game, TwoPlayers::TWO);
+                debug_assert!(game.valid_move(TwoPlayers::TWO, &mv));
                 println!("Opponent's move: {}", mv);
-                game.make_move(TwoPlayers::Two, mv);
+                game.make_move(TwoPlayers::TWO, mv);
             }
-            GameStatus::Won(TwoPlayers::One) => {
+            GameStatus::Won(TwoPlayers::ONE) => {
                 println!("You win!");
                 return;
             }
-            GameStatus::Won(TwoPlayers::Two) => {
+            GameStatus::Won(TwoPlayers::TWO) => {
                 println!("You lose!");
                 return;
+            }
+            _ => {
+                panic!("invariant violated, player not 1 or 2");
             }
         }
     }
