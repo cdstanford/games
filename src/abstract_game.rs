@@ -19,6 +19,9 @@ pub enum GameStatus<const N: usize> {
 
 /// Main game trait
 /// N is the number of players
+/// Note: N should be >= 0, but we don't really have to enforce this. What happens
+/// if N = 0 is that it's impossible to implement `fn status()` since GameStatus
+/// is uninhabited.
 pub trait AbstractGame<const N: usize> {
     type Move;
 
