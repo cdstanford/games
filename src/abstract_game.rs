@@ -41,6 +41,15 @@ pub trait AbstractGame<const N: usize> {
     /// Making the move -- ok to assume that it is valid
     fn make_move(&mut self, mv: Self::Move);
 
+    /// Query to the user to make a move
+    fn query(&self) -> String;
+
+    /// Parsing the move from a string.
+    /// On error, print a helpful error message.
+    /// It is recommended to also error in case of an invalid move, so that the
+    /// error message will be more specific.
+    fn parse_move(&self, raw: &str) -> Result<Self::Move, String>;
+
     /// Game state visible to a particular player
     fn print_state_visible(&self, plyr: Player<N>) -> String;
 

@@ -178,6 +178,14 @@ impl AbstractGame<NUM_PLAYERS> for GameState {
             }
         }
     }
+    fn query(&self) -> String {
+        // TODO: make more helpful
+        "Move: ".to_string()
+    }
+    fn parse_move(&self, raw: &str) -> Result<Move, String> {
+        // TODO: make more helpful
+        Move::from_str(raw).map_err(|()| "Could not parse move. ".to_string())
+    }
     fn print_state_visible(&self, plyr: TwoPlayers) -> String {
         if self.get_pending(plyr).is_empty() {
             let other = plyr.opponent();

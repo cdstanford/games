@@ -73,6 +73,7 @@ impl<const N: usize> AbstractGame<N> for NimState<N> {
     fn new() -> Self {
         Self::new_from_user_input()
     }
+
     fn status(&self) -> GameStatus<N> {
         if self.total_sticks == 0 {
             GameStatus::Won(self.to_move.prev_player())
@@ -80,16 +81,48 @@ impl<const N: usize> AbstractGame<N> for NimState<N> {
             GameStatus::ToMove(self.to_move)
         }
     }
+
     fn is_valid_move(&self, mv: &NimMove) -> bool {
         mv.pile < self.piles.len()
             && mv.take >= 1
             && mv.take <= self.piles[mv.pile]
     }
-    fn make_move(&mut self, mv: Self::Move) {
+
+    fn make_move(&mut self, mv: NimMove) {
         self.piles[mv.pile] -= mv.take;
         self.total_sticks -= mv.take;
         self.to_move.advance_player();
     }
+
+    fn query(&self) -> String {
+        "Choose a pile and number of sticks: ".to_string()
+    }
+
+    fn parse_move(&self, raw: &str) -> Result<NimMove, String> {
+        let ints = util::parse_vec_usize(raw).ok_or_else(|| {
+            "Move should be two integers separated by a space. ".to_string()
+        })?;
+        if ints.len() == 2 {
+            let result = NimMove { pile: ints[0], take: ints[1] };
+            if result.pile >= self.piles.len() {
+                Err(format!(
+                    "Pile should be between {} and {}. ",
+                    0,
+                    self.piles.len() - 1
+                ))
+            } else if result.take == 0 {
+                Err("Must take at least one stick. ".to_string())
+            } else if result.take > self.piles[result.pile] {
+                Err("Not enough sticks in that pile. ".to_string())
+            } else {
+                debug_assert!(self.is_valid_move(&result));
+                Ok(result)
+            }
+        } else {
+            Err("Move should be exactly two integers. ".to_string())
+        }
+    }
+
     fn print_state_visible(&self, _plyr: Player<N>) -> String {
         format!("Piles: {:?}", self.piles)
     }
