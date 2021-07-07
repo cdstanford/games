@@ -26,15 +26,13 @@ where
             GameStatus::ToMove(plyr) => {
                 println!("===== Player {}'s turn =====", plyr);
                 println!("{}", game.print_state_visible(plyr));
-                // TODO
-                // println!("Available moves: {:?}", game.valid_moves());
-                let mv = util::from_user_input_satisfying(
-                    "Move: ",
-                    "Invalid syntax, try again: ",
-                    "Invalid move, try again: ",
-                    |mv| game.is_valid_move(mv),
-                );
+
+                let query = game.query();
+                let mv = util::from_user_input_parsing(&query, |raw| {
+                    game.parse_valid_move(&raw)
+                });
                 debug_assert!(game.is_valid_move(&mv));
+
                 println!("Move chosen: {}", mv);
                 game.make_move(mv);
             }
@@ -62,15 +60,13 @@ where
                 if plyr == you {
                     println!("===== Your turn =====");
                     println!("{}", game.print_state_visible(you));
-                    // TODO
-                    // println!("Available moves: {:?}", game.valid_moves());
-                    let mv = util::from_user_input_satisfying(
-                        "Move: ",
-                        "Invalid syntax, try again: ",
-                        "Invalid move, try again: ",
-                        |mv| game.is_valid_move(mv),
-                    );
+
+                    let query = game.query();
+                    let mv = util::from_user_input_parsing(&query, |raw| {
+                        game.parse_valid_move(&raw)
+                    });
                     debug_assert!(game.is_valid_move(&mv));
+
                     println!("Your move: {}", mv);
                     game.make_move(mv);
                 } else {

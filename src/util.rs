@@ -20,6 +20,17 @@ pub fn user_input(query: &str) -> String {
         .expect("failed to get line from stdin")
 }
 
+pub fn from_user_input_parsing<T, P>(query: &str, parse_fun: P) -> T
+where
+    P: Fn(String) -> Result<T, String>,
+{
+    let mut result = parse_fun(user_input(query));
+    while let Err(msg) = result {
+        result = parse_fun(user_input(&msg));
+    }
+    result.unwrap()
+}
+
 pub fn from_user_input<T: FromStr>(query: &str, query_again: &str) -> T {
     let mut result = user_input(query).parse().ok();
     while result.is_none() {

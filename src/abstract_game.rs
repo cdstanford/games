@@ -57,6 +57,17 @@ pub trait AbstractGame<const N: usize> {
         Derived functionality
     */
 
+    /// Parse a move and print "invalid string" if the move is invalid
+    fn parse_valid_move(&self, raw: &str) -> Result<Self::Move, String> {
+        self.parse_move(raw).and_then(|mv| {
+            if self.is_valid_move(&mv) {
+                Ok(mv)
+            } else {
+                Err("Invalid move".to_string())
+            }
+        })
+    }
+
     /// Number of players in the game
     fn num_players(&self) -> usize {
         N
