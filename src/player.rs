@@ -35,9 +35,19 @@ impl<const N: usize> Player<N> {
     }
 
     /// Cycle between players
+    pub fn prev_player(&self) -> Self {
+        debug_assert!(self.is_valid());
+        Self::from_index((self.0 + N - 1) % N).unwrap()
+    }
     pub fn next_player(&self) -> Self {
         debug_assert!(self.is_valid());
         Self::from_index((self.0 + 1) % N).unwrap()
+    }
+    pub fn advance_player(&mut self) {
+        debug_assert!(self.is_valid());
+        self.0 += 1;
+        self.0 %= N;
+        debug_assert!(self.is_valid());
     }
 
     /// Human-readable name -- lower case and upper case versions

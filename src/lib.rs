@@ -8,3 +8,4 @@ pub mod view;
 
 // Games implemented
 pub mod battleship;
+pub mod nim;
