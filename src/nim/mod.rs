@@ -7,7 +7,6 @@ use crate::player::Player;
 use crate::util;
 
 use std::fmt::{self, Display};
-use std::str::FromStr;
 
 #[derive(Debug)]
 pub struct NimState<const N: usize> {
@@ -52,18 +51,6 @@ pub struct NimMove {
 impl Display for NimMove {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Take {} from pile {}", self.take, self.pile)
-    }
-}
-impl FromStr for NimMove {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, ()> {
-        let ints = util::parse_vec_usize(s).ok_or(())?;
-        if ints.len() == 2 {
-            Ok(Self { pile: ints[0], take: ints[1] })
-        } else {
-            Err(())
-        }
     }
 }
 

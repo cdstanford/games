@@ -6,8 +6,7 @@ use super::abstract_game::{AbstractGame, Ai, GameStatus};
 use super::player::Player;
 use super::util;
 
-use std::fmt::{Debug, Display};
-use std::str::FromStr;
+use std::fmt::Display;
 
 /*
     Code to play (execute) a game
@@ -18,7 +17,7 @@ use std::str::FromStr;
 pub fn play_vs_yourself<G, const N: usize>()
 where
     G: AbstractGame<N>,
-    G::Move: FromStr + Debug + Display,
+    G::Move: Display,
 {
     let mut game = G::new();
     loop {
@@ -49,8 +48,8 @@ where
 pub fn play_vs_ai<G, A, const N: usize>(you: Player<N>)
 where
     G: AbstractGame<N>,
+    G::Move: Display,
     A: Ai<G, N>,
-    G::Move: FromStr + Debug + Display,
 {
     let mut game = G::new();
     let mut ai = A::new();
@@ -95,8 +94,8 @@ where
 pub fn play_vs_ai_as_p1<G, A, const N: usize>()
 where
     G: AbstractGame<N>,
+    G::Move: Display,
     A: Ai<G, N>,
-    G::Move: FromStr + Debug + Display,
 {
     play_vs_ai::<G, A, N>(
         Player::from_index(0)
@@ -108,8 +107,8 @@ where
 pub fn play_vs_ai_choose_player<G, A, const N: usize>()
 where
     G: AbstractGame<N>,
+    G::Move: Display,
     A: Ai<G, N>,
-    G::Move: FromStr + Debug + Display,
 {
     let query = format!("Choose a player between 1 and {}: ", N);
     let requery = format!("Not between 1 and {}. Try again: ", N);

@@ -4,7 +4,6 @@
 
 use std::collections::HashSet;
 use std::fmt::{self, Display};
-use std::str::FromStr;
 
 use super::board::{Board, Coord, Dir};
 
@@ -65,13 +64,6 @@ impl Move {
         } else {
             None
         }
-    }
-}
-impl FromStr for Move {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, ()> {
-        Self::parse_core(s).ok_or(())
     }
 }
 impl Display for Move {
@@ -184,7 +176,8 @@ impl AbstractGame<NUM_PLAYERS> for GameState {
     }
     fn parse_move(&self, raw: &str) -> Result<Move, String> {
         // TODO: make more helpful
-        Move::from_str(raw).map_err(|()| "Could not parse move. ".to_string())
+        Move::parse_core(raw)
+            .ok_or_else(|| "Could not parse move. ".to_string())
     }
     fn print_state_visible(&self, plyr: TwoPlayers) -> String {
         if self.get_pending(plyr).is_empty() {
