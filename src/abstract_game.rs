@@ -4,7 +4,7 @@
     about the precise amount of state available to each player.
 
     Particular types of games (game with complete info, partial info,
-    or randomness) are special cases of this trait.
+    or randomness) can be considered special cases of this trait.
 */
 
 use super::player::Player;
@@ -38,11 +38,6 @@ pub trait AbstractGame<const N: usize> {
     /// Given a move, return whether or not it is valid
     fn is_valid_move(&self, mv: &Self::Move) -> bool;
 
-    // /// The list of valid moves in this position
-    // /// Ideally should not include duplicate moves
-    // /// TODO
-    // fn valid_moves(&self) -> Vec<Self::Move>;
-
     /// Making the move -- ok to assume that it is valid
     fn make_move(&mut self, mv: Self::Move);
 
@@ -73,12 +68,6 @@ pub trait AbstractGame<const N: usize> {
             GameStatus::Won(_) => None,
         }
     }
-
-    // /// Number of moves from this position
-    // TODO
-    // fn num_moves(&self) -> usize {
-    //     self.valid_moves().len()
-    // }
 }
 
 pub trait Ai<G, const N: usize>
