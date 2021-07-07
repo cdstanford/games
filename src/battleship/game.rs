@@ -109,6 +109,22 @@ impl GameState {
     fn no_pending_placements(&self) -> bool {
         self.pending_placement.iter().all(|set| set.is_empty())
     }
+    fn is_valid_move_core(&self, mv: &Move) -> bool {
+        let plyr = self.cur_player().unwrap();
+        debug_assert_eq!(self.status(), GameStatus::ToMove(plyr));
+        match *mv {
+            Move::PlaceShip(ship, coord, dir) => {
+                let len = ship.length;
+                self.get_pending(plyr).contains(&ship)
+                    && coord.is_valid()
+                    && dir.is_valid()
+                    && self.get_board(plyr).valid_ship_line(coord, dir, len)
+            }
+            Move::Shoot(coord) => {
+                self.no_pending_placements() && coord.is_valid()
+            }
+        }
+    }
 }
 
 impl AbstractGame<NUM_PLAYERS> for GameState {
@@ -139,20 +155,21 @@ impl AbstractGame<NUM_PLAYERS> for GameState {
             GameStatus::ToMove(self.to_move)
         }
     }
-    fn is_valid_move(&self, mv: &Move) -> bool {
-        let plyr = self.cur_player().unwrap();
-        debug_assert_eq!(self.status(), GameStatus::ToMove(plyr));
-        match *mv {
-            Move::PlaceShip(ship, coord, dir) => {
-                let len = ship.length;
-                self.get_pending(plyr).contains(&ship)
-                    && coord.is_valid()
-                    && dir.is_valid()
-                    && self.get_board(plyr).valid_ship_line(coord, dir, len)
-            }
-            Move::Shoot(coord) => {
-                self.no_pending_placements() && coord.is_valid()
-            }
+    fn query(&self) -> String {
+        // TODO: make more helpful
+        "Move: ".to_string()
+    }
+    fn parse_move(&self, raw: &str) -> Result<Move, String> {
+        // TODO: make this more helpful
+        Move::parse_core(raw)
+            .ok_or_else(|| "Could not parse move. ".to_string())
+    }
+    fn check_move(&self, mv: &Move) -> Result<(), String> {
+        // TODO: make this more helpful
+        if self.is_valid_move_core(mv) {
+            Ok(())
+        } else {
+            Err("Invalid move".to_string())
         }
     }
     fn make_move(&mut self, mv: Move) {
@@ -169,15 +186,6 @@ impl AbstractGame<NUM_PLAYERS> for GameState {
                 self.get_board_mut(plyr).shoot(coord);
             }
         }
-    }
-    fn query(&self) -> String {
-        // TODO: make more helpful
-        "Move: ".to_string()
-    }
-    fn parse_move(&self, raw: &str) -> Result<Move, String> {
-        // TODO: make more helpful
-        Move::parse_core(raw)
-            .ok_or_else(|| "Could not parse move. ".to_string())
     }
     fn print_state_visible(&self, plyr: TwoPlayers) -> String {
         if self.get_pending(plyr).is_empty() {

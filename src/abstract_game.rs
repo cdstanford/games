@@ -35,20 +35,24 @@ pub trait AbstractGame<const N: usize> {
     /// Who is to move, or (if the game is ended) who has won
     fn status(&self) -> GameStatus<N>;
 
-    /// Given a move, return whether or not it is valid
-    fn is_valid_move(&self, mv: &Self::Move) -> bool;
-
-    /// Making the move -- ok to assume that it is valid
-    fn make_move(&mut self, mv: Self::Move);
-
     /// Query to the user to make a move
     fn query(&self) -> String;
 
     /// Parsing the move from a string.
     /// On error, print a helpful error message.
-    /// It is recommended to also error in case of an invalid move, so that the
-    /// error message will be more specific.
+    /// This method should only check for whether the string can be parsed
+    /// as Move; additionally checking that the move is valid should be in
+    /// check_move.
     fn parse_move(&self, raw: &str) -> Result<Self::Move, String>;
+
+    /// Additional check that the move is valid; this is necessary since the set of
+    /// valid moves often varies by position.
+    /// On error, print a helpful error message.
+    /// is_valid_move is derived from this.
+    fn check_move(&self, mv: &Self::Move) -> Result<(), String>;
+
+    /// Making the move -- ok to assume that it is valid
+    fn make_move(&mut self, mv: Self::Move);
 
     /// Game state visible to a particular player
     fn print_state_visible(&self, plyr: Player<N>) -> String;
@@ -57,15 +61,15 @@ pub trait AbstractGame<const N: usize> {
         Derived functionality
     */
 
-    /// Parse a move and print "invalid string" if the move is invalid
+    /// Given a move, return whether or not it is valid
+    fn is_valid_move(&self, mv: &Self::Move) -> bool {
+        self.check_move(mv).is_ok()
+    }
+
+    /// Parse a move and check it is valid.
+    /// Combines parse_move and check_move into one.
     fn parse_valid_move(&self, raw: &str) -> Result<Self::Move, String> {
-        self.parse_move(raw).and_then(|mv| {
-            if self.is_valid_move(&mv) {
-                Ok(mv)
-            } else {
-                Err("Invalid move".to_string())
-            }
-        })
+        self.parse_move(raw).and_then(|mv| self.check_move(&mv).map(|()| mv))
     }
 
     /// Number of players in the game

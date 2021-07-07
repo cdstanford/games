@@ -23,7 +23,7 @@ where
     loop {
         match game.status() {
             GameStatus::ToMove(plyr) => {
-                println!("===== Player {}'s turn =====", plyr);
+                println!("===== {}'s turn =====", plyr);
                 println!("{}", game.print_state_visible(plyr));
 
                 let query = game.query();
@@ -36,7 +36,7 @@ where
                 game.make_move(mv);
             }
             GameStatus::Won(plyr) => {
-                println!("Player {} wins!", plyr);
+                println!("{} wins!", plyr);
                 return;
             }
         }
