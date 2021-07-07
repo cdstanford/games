@@ -88,8 +88,8 @@ impl<const N: usize> AbstractGame<N> for NimState<N> {
         if mv.pile >= self.piles.len() {
             Err(format!(
                 "Pile should be between {} and {}. ",
-                0,
-                self.piles.len() - 1
+                1,
+                self.piles.len()
             ))
         } else if mv.take == 0 {
             Err("Must take at least one stick. ".to_string())
@@ -101,7 +101,9 @@ impl<const N: usize> AbstractGame<N> for NimState<N> {
     }
 
     fn make_move(&mut self, mv: NimMove) {
-        self.piles[mv.pile] -= mv.take;
+        debug_assert!(mv.pile >= 1);
+        debug_assert!(mv.pile <= self.piles.len());
+        self.piles[mv.pile - 1] -= mv.take;
         self.total_sticks -= mv.take;
         self.to_move.advance_player();
     }
