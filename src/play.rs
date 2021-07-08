@@ -19,7 +19,7 @@ where
     G: AbstractGame<N>,
     G::Move: Display,
 {
-    let mut game = G::new();
+    let mut game = G::new_from_user_input();
     loop {
         match game.status() {
             GameStatus::ToMove(plyr) => {
@@ -51,7 +51,7 @@ where
     G::Move: Display,
     A: Ai<G, N>,
 {
-    let mut game = G::new();
+    let mut game = G::new_from_user_input();
     let mut ai = A::new();
     loop {
         match game.status() {

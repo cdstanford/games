@@ -15,13 +15,23 @@ pub struct NimState<const N: usize> {
     to_move: Player<N>,
 }
 
-impl<const N: usize> NimState<N> {
-    pub fn new(piles: Vec<usize>) -> Self {
-        let total_sticks = piles.iter().sum();
-        let to_move = Player::from_index(0).unwrap();
-        Self { piles, total_sticks, to_move }
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct NimMove {
+    // Note: pile should be >= 1 (uses 1-indexing)
+    pile: usize,
+    take: usize,
+}
+impl Display for NimMove {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Take {} from pile {}", self.take, self.pile)
     }
-    pub fn new_from_user_input() -> Self {
+}
+
+impl<const N: usize> AbstractGame<N> for NimState<N> {
+    type Move = NimMove;
+    type SetupParams = Vec<usize>;
+
+    fn setup_from_user_input() -> Vec<usize> {
         let mut piles: Vec<usize> = Vec::new();
         let num_piles: usize = util::from_user_input(
             "Number of piles? ",
@@ -39,26 +49,13 @@ impl<const N: usize> NimState<N> {
         debug_assert_eq!(piles.len(), num_piles);
         println!("Piles: {:?}", piles);
 
-        Self::new(piles)
+        piles
     }
-}
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct NimMove {
-    pile: usize,
-    take: usize,
-}
-impl Display for NimMove {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Take {} from pile {}", self.take, self.pile)
-    }
-}
-
-impl<const N: usize> AbstractGame<N> for NimState<N> {
-    type Move = NimMove;
-
-    fn new() -> Self {
-        Self::new_from_user_input()
+    fn game_setup(piles: Vec<usize>) -> Self {
+        let total_sticks = piles.iter().sum();
+        let to_move = Player::from_index(0).unwrap();
+        Self { piles, total_sticks, to_move }
     }
 
     fn status(&self) -> GameStatus<N> {
@@ -85,7 +82,8 @@ impl<const N: usize> AbstractGame<N> for NimState<N> {
     }
 
     fn check_move(&self, mv: &NimMove) -> Result<(), String> {
-        if mv.pile >= self.piles.len() {
+        // Pile uses one indexing
+        if mv.pile == 0 || mv.pile > self.piles.len() {
             Err(format!(
                 "Pile should be between {} and {}. ",
                 1,
@@ -93,7 +91,7 @@ impl<const N: usize> AbstractGame<N> for NimState<N> {
             ))
         } else if mv.take == 0 {
             Err("Must take at least one stick. ".to_string())
-        } else if mv.take > self.piles[mv.pile] {
+        } else if mv.take > self.piles[mv.pile - 1] {
             Err("Not enough sticks in that pile. ".to_string())
         } else {
             Ok(())

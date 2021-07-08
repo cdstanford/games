@@ -24,13 +24,18 @@ pub enum GameStatus<const N: usize> {
 /// is uninhabited.
 pub trait AbstractGame<const N: usize> {
     type Move: Eq;
+    type SetupParams;
 
     /*
         Provided methods
     */
 
+    /// Get setup parameters from user input
+    /// This function should call the util::from_user_input family of functions
+    fn setup_from_user_input() -> Self::SetupParams;
+
     /// Starting position
-    fn new() -> Self;
+    fn game_setup(params: Self::SetupParams) -> Self;
 
     /// Who is to move, or (if the game is ended) who has won
     fn status(&self) -> GameStatus<N>;
@@ -60,6 +65,15 @@ pub trait AbstractGame<const N: usize> {
     /*
         Derived functionality
     */
+
+    /// Create a new game using setup paramaters from user input
+    fn new_from_user_input() -> Self
+    where
+        Self: Sized,
+    {
+        let params = Self::setup_from_user_input();
+        Self::game_setup(params)
+    }
 
     /// Given a move, return whether or not it is valid
     fn is_valid_move(&self, mv: &Self::Move) -> bool {

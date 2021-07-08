@@ -129,8 +129,12 @@ impl GameState {
 
 impl AbstractGame<NUM_PLAYERS> for GameState {
     type Move = Move;
+    type SetupParams = ();
 
-    fn new() -> Self {
+    /// Parse setup parameters
+    fn setup_from_user_input() {}
+
+    fn game_setup(_params: ()) -> Self {
         let to_move = TwoPlayers::ONE;
         let ships: HashSet<ShipType> = STARTING_SHIPS
             .iter()
